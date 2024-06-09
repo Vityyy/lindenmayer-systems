@@ -9,7 +9,7 @@
   {:x coord-x :y coord-y :angulo-cons angulo :angulo-act angulo :pluma pluma-abajo})
 
 (defn adelante [tortuga n]
-  (let [angulo-radianes (Math/toRadians (:angulo tortuga))
+  (let [angulo-radianes (Math/toRadians (get tortuga :angulo-act))
         dx (* n (Math/cos angulo-radianes))
         dy (* n (Math/sin angulo-radianes))]
     (-> tortuga
@@ -17,13 +17,13 @@
         (update :y + dy))))
 
 (defn invertir [tortuga]
-  (update tortuga :angulo-actual + 180))
+  (update tortuga :angulo-act + 180))
 
 (defn derecha [tortuga]
-  (update tortuga :angulo-actual - :angulo-cons))
+  (update tortuga :angulo-act - (tortuga :angulo-cons)))
 
 (defn izquierda [tortuga]
-  (update tortuga :angulo-actual + :angulo-cons))
+  (update tortuga :angulo-act + (tortuga :angulo-cons)))
 
 (defn pluma-arriba [tortuga]
   (update tortuga :pluma false))
@@ -44,7 +44,6 @@
           y2 (:y tortuga-nueva)
           mov {:x1 x1 :y1 y1 :x2 x2 :y2 y2}]
       (conj historial mov))
-
     historial
     ))
 
@@ -53,7 +52,7 @@
         minimo-y (reduce min (concat (map :y1 historial) (map :y2 historial)))
         maximo-x (reduce max (concat (map :x1 historial) (map :x2 historial)))
         maximo-y (reduce max (concat (map :y1 historial) (map :y2 historial)))]
-    ([minimo-x minimo-y maximo-x maximo-y]))
+    (vector minimo-x minimo-y maximo-x maximo-y))
   )
 
 (defn escribir-svg [historial nombre-archivo]
@@ -68,7 +67,7 @@
 
 (defn escribir-svg-wrapper [historial nombre-archivo]
   (let [limites(calcular-limites historial)]
-    (spit nombre-archivo (str "<svg viewBox=\"" (limites 1) "\"" (limites 2) "\"" (limites 3) "\"" (limites 4) "\"" "xmlns=\"http://www.w3.org/2000/svg\" />")))
+    (spit nombre-archivo (str "<svg viewBox=\"" (limites 0) "\"" (limites 1) "\"" (limites 2) "\"" (limites 3) "\"" "xmlns=\"http://www.w3.org/2000/svg\" />")))
 
   (escribir-svg historial nombre-archivo)
   (spit nombre-archivo "</svg>")
@@ -87,7 +86,8 @@
         nueva_pila (cond
                      (= paso "[") (apilar-tortuga tortuga pila)
                      (= paso "]") (desapilar-tortuga pila)
-                     (not (nil? tortuga-nueva)) (apilar-tortuga tortuga-nueva (desapilar-tortuga pila)))
+                     (not (nil? tortuga-nueva)) (apilar-tortuga tortuga-nueva (desapilar-tortuga pila))
+                     :else pila)
 
         historial-actualizado (detectar-movimiento paso tortuga tortuga-nueva historial)]
     (if (not-empty expresion)
@@ -97,21 +97,24 @@
 
 (defn wrap-tortuga [angulo expresion]
   (let [tortuga (nueva-tortuga 0 0 angulo true)
-        pila '(tortuga)
+        pila (list tortuga)
         historial '()]
 
     (dibujar pila expresion historial)))
 
-(defn hallar-expresion [expresion-actual reglas]
+(defn hallar-expr-aux [expresion-actual reglas]
   (if (empty? expresion-actual)
     ""
     (let [elemento-actual (str (first expresion-actual))
           regla (get reglas (keyword elemento-actual) elemento-actual)]
 
-      (str regla (hallar-expresion (rest expresion-actual) reglas)))))
+      (str regla (hallar-expr-aux (rest expresion-actual) reglas)))))
 
-(defn wrapper-hallar-expresion [axioma reglas iteraciones]
-  (if (zero? iteraciones) ())
+(defn hallar-expresion [expresion reglas iteraciones]
+  (if (zero? iteraciones)
+    expresion
+    (let [nueva-expresion (hallar-expr-aux expresion reglas)]
+      (hallar-expresion nueva-expresion reglas (dec iteraciones))))
   )
 
 (defn convertir-reglas-a-diccionario [reglas]
@@ -123,10 +126,9 @@
 
 (defn -main [nombre-entrada iteraciones nombre-svg]
   (let [entrada (procesar-entrada nombre-entrada)
-        angulo (first entrada)
+        angulo (read-string (str/trim (first entrada)))
         axioma (entrada 1)
         reglas (convertir-reglas-a-diccionario (subvec entrada 2))
         ]
-
-    (escribir-svg-wrapper (wrap-tortuga angulo (hallar-expresion axioma reglas)) nombre-svg)
+    (escribir-svg-wrapper (wrap-tortuga angulo (hallar-expresion axioma reglas iteraciones)) nombre-svg)
   ))
