@@ -1,12 +1,16 @@
 (ns algo3-tp2-sistemasl.core
   (:require
     [clojure.string :as str]))
+
+; Lee el archivo de entrada y lo divide en líneas
 (defn procesar-entrada [nombre-archivo]
   (str/split (slurp (str "resources/" nombre-archivo)) #"\n") )
 
+; Crea una nueva tortuga a partir de las coordenadas, el ángulo dado y la posición de la pluma
 (defn nueva-tortuga [coord-x coord-y angulo pluma-abajo]
   {:x coord-x :y coord-y :angulo-cons angulo :angulo-act 90 :pluma pluma-abajo})
 
+; Mueve la tortuga hacia adelante n pasos
 (defn adelante [tortuga n]
   (let [angulo-radianes (Math/toRadians (get tortuga :angulo-act))
         dx (* n (Math/cos angulo-radianes))
@@ -15,12 +19,15 @@
         (update :x + dx)
         (update :y + dy))))
 
+; Invierte la dirección en la que mira la tortuga
 (defn invertir [tortuga]
   (update tortuga :angulo-act + 180))
 
+; Rota la tortuga hacia la derecha
 (defn derecha [tortuga]
   (update tortuga :angulo-act - (tortuga :angulo-cons)))
 
+; Rota la tortuga hacia la izquierda
 (defn izquierda [tortuga]
   (update tortuga :angulo-act + (tortuga :angulo-cons)))
 
@@ -36,6 +43,7 @@
 (defn desapilar-tortuga [pila]
   (rest pila))
 
+; Detecta si el 'paso' dado es un movimiento y en ese caso agrega el conjunto de coordenadas al historial
 (defn detectar-movimiento [paso tortuga-vieja tortuga-nueva historial]
   (if (or (= paso "F") (= paso "G"))
     (let [x1 (:x tortuga-vieja)
@@ -47,6 +55,7 @@
     historial
     ))
 
+; Calcula los límites del dibujo para el SVG viewbox. Devuelve un vector
 (defn calcular-limites [historial]
   (let [minimo-x (reduce min (concat (map :x1 historial) (map :x2 historial)))
         minimo-y (reduce min (concat (map :y1 historial) (map :y2 historial)))
@@ -58,6 +67,7 @@
     (vector minimo-x maximo-y ancho alto))
   )
 
+; Escribe las líneas en el svg "nombre-archivo" a partir del historial de movimientos dado
 (defn escribir-svg [historial nombre-archivo]
   (let [
         mov (first historial)
@@ -68,13 +78,18 @@
     (if (not-empty rest)
       (recur rest nombre-archivo))))
 
+; Imprime el header y footer del svg y llama a escribir-svg para escribir las líneas correspondientes
 (defn escribir-svg-wrapper [historial nombre-archivo]
-  (let [limites(calcular-limites historial)
+  (let [limites (calcular-limites historial)
         viewbox (str (- (limites 0) 100) " " (- (- (limites 1)) 100) " " (+ (limites 2) 100) " " (+ (limites 3) 100))]
     (spit nombre-archivo (str "<svg viewBox=\"" viewbox "\" xmlns=\"http://www.w3.org/2000/svg\">") :append true)
   (escribir-svg historial nombre-archivo)
   (spit nombre-archivo "</svg>" :append true)
   ))
+
+; Corrobora qué regla se aplica a cada paso dependiendo de la expresión dada. Al mismo tiempo se irá
+; actualizando el historial y guardado la tortuga anterior y la nueva
+; Se hará de forma recursiva hasta que no queden más pasos en la expresión
 (defn dibujar [pila expresion historial]
   (if (empty? expresion)
     historial
@@ -98,6 +113,7 @@
 
       (recur nueva_pila (rest expresion) historial-actualizado))))
 
+; Función principal que se encarga de inicializar la tortuga y llamar a dibujar
 (defn wrap-tortuga [angulo expresion]
   (let [tortuga (nueva-tortuga 0 0 angulo true)
         pila (list tortuga)
@@ -105,6 +121,7 @@
 
     (dibujar pila expresion historial)))
 
+; Función auxiliar que se encarga de encontrar la expresión final a partir de las reglas dadas
 (defn hallar-expr-aux [expresion-actual reglas resultado]
   (if (empty? expresion-actual)
     resultado
@@ -113,6 +130,7 @@
 
       (recur (rest expresion-actual) reglas (str resultado regla)))))
 
+; Se encarga de llamar a hallar-expr-aux iterativamente hasta que se cumpla la cantidad de iteraciones
 (defn hallar-expresion [expresion reglas iteraciones]
   (if (zero? iteraciones)
     expresion
