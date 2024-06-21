@@ -1,6 +1,7 @@
 (ns algo3-tp2-sistemasl.core
   (:require
-    [clojure.string :as str]))
+    [clojure.string :as str])
+  (:gen-class :main true))
 
 ; Lee el archivo de entrada y lo divide en líneas
 (defn procesar-entrada [nombre-archivo]
