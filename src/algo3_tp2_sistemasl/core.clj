@@ -152,5 +152,5 @@
         axioma (entrada 1)
         reglas (convertir-reglas-a-diccionario (subvec entrada 2))
         ]
-    (escribir-svg-wrapper (wrap-tortuga angulo (hallar-expresion axioma reglas iteraciones)) nombre-svg)
+    (escribir-svg-wrapper (wrap-tortuga angulo (hallar-expresion axioma reglas (read-string iteraciones))) nombre-svg)
   ))
