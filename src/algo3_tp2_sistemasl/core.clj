@@ -33,10 +33,10 @@
   (update tortuga :angulo-act + (tortuga :angulo-cons)))
 
 (defn pluma-arriba [tortuga]
-  (update tortuga :pluma false))
+  (assoc tortuga :pluma false))
 
 (defn pluma-abajo [tortuga]
-  (update tortuga :pluma true))
+  (assoc tortuga :pluma true))
 
 (defn apilar-tortuga [tortuga pila]
   (conj pila (into {} tortuga)))
