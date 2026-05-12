@@ -2,7 +2,7 @@
   <strong>English</strong> | <a href="README.es.md">Espanol</a>
 </p>
 
-# L-Systems in Clojure
+# Lindenmayer Systems in Clojure
 
 <div align="center">
 
