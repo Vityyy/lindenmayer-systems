@@ -1,24 +1,19 @@
-# Change Log
-All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
+# Changelog
 
-## [Unreleased]
+## Unreleased
+
 ### Changed
-- Add a new arity to `make-widget-async` to provide a different widget shape.
 
-## [0.1.1] - 2024-06-04
-### Changed
-- Documentation on how to make the widgets.
+- Replaced the generated failing test with coverage of rewriting, parsing,
+  turtle movement, rotation, branching, bounds calculation, and SVG output.
+- Corrected the project documentation and Leiningen metadata.
+- Added an SVG generated from one of the included L-System definitions.
 
-### Removed
-- `make-widget-sync` - we're all async, all the time.
+The implementation under `src/` is unchanged from the 2024 academic project.
 
-### Fixed
-- Fixed widget maker to keep working when daylight savings switches over.
+## 0.1.0 - 2024-06
 
-## 0.1.0 - 2024-06-04
 ### Added
-- Files from the new template.
-- Widget maker public API - `make-widget-sync`.
 
-[Unreleased]: https://sourcehost.site/your-name/algo3-tp2-sistemasl/compare/0.1.1...HEAD
-[0.1.1]: https://sourcehost.site/your-name/algo3-tp2-sistemasl/compare/0.1.0...0.1.1
+- Academic implementation of an L-System rewriting engine, turtle interpreter,
+  and SVG renderer.

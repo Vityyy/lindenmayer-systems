@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# The original parser splits resource files on \n and expects no trailing \r.
+*.sl text eol=lf
